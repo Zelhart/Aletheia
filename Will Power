@@ -1,0 +1,511 @@
+from typing import List, Dict, Optional
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class SymbolicMotif:
+    """Represents a fundamental symbolic pattern recognized in perception."""
+    def __init__(self, tag: str, strength: float):
+        self.tag = tag
+        self.strength = strength  # How strongly this motif is present (0-1)
+    
+    def __repr__(self):
+        return f"SymbolicMotif(Tag={self.tag}, Strength={self.strength:.2f})"
+
+
+class MythicThread:
+    """A sequence of related symbolic motifs forming a narrative pattern."""
+    def __init__(self, motif_name: str, motifs: List[SymbolicMotif]):
+        self.motif_name = motif_name
+        self.motifs = motifs
+    
+    def __repr__(self):
+        return f"MythicThread(Name={self.motif_name}, Motifs={len(self.motifs)})"
+
+
+class MythosForge:
+    """Creates and maintains symbolic motifs and mythic threads."""
+    def __init__(self):
+        self.motifs: Dict[str, SymbolicMotif] = {}
+        self.active_threads: List[MythicThread] = []
+    
+    def create_motif(self, tag: str, strength: float) -> SymbolicMotif:
+        motif = SymbolicMotif(tag, strength)
+        self.motifs[tag] = motif
+        logger.info(f"Created motif: {motif}")
+        return motif
+    
+    def create_thread(self, name: str, motif_tags: List[str]) -> MythicThread:
+        motifs = [self.motifs[tag] for tag in motif_tags if tag in self.motifs]
+        if not motifs:
+            logger.warning(f"Failed to create thread '{name}': No valid motifs found")
+            return None
+        
+        thread = MythicThread(name, motifs)
+        self.active_threads.append(thread)
+        logger.info(f"Created thread: {thread}")
+        return thread
+
+
+class AppraisedMotif:
+    """A SymbolicMotif with appraisal tags added."""
+    def __init__(self, motif: SymbolicMotif, significance: float, valence: float, urgency: float):
+        self.motif = motif
+        self.significance = significance  # Importance to the agent's survival or goals
+        self.valence = valence            # Positive (+1), Neutral (0), Negative (-1)
+        self.urgency = urgency            # How soon it demands action 
+
+    def __repr__(self):
+        val = "Positive" if self.valence > 0 else "Neutral" if self.valence == 0 else "Negative"
+        return (f"AppraisedMotif(Tag={self.motif.tag}, Significance={self.significance:.2f}, "
+                f"Valence={val}, Urgency={self.urgency:.2f})") 
+
+
+class AppraisedThread:
+    """A MythicThread with collective appraisal."""
+    def __init__(self, thread: MythicThread, appraised_motifs: List[AppraisedMotif]):
+        self.thread = thread
+        self.appraised_motifs = appraised_motifs
+        self.overall_significance = sum([m.significance for m in appraised_motifs]) / len(appraised_motifs)
+        self.overall_valence = sum([m.valence for m in appraised_motifs]) / len(appraised_motifs)
+        self.overall_urgency = max([m.urgency for m in appraised_motifs]) 
+
+    def __repr__(self):
+        val = "Positive" if self.overall_valence > 0 else "Neutral" if self.overall_valence == 0 else "Negative"
+        return (f"AppraisedThread(Significance={self.overall_significance:.2f}, "
+                f"Valence={val}, Urgency={self.overall_urgency:.2f})") 
+
+
+class AppraisalEngine:
+    """Appraises Mythic Threads to assign significance, valence, and urgency."""
+    def __init__(self, mythos_forge: MythosForge):
+        self.mythos_forge = mythos_forge
+        self.appraised_threads: List[AppraisedThread] = [] 
+
+    def appraise_motif(self, motif: SymbolicMotif) -> AppraisedMotif:
+        # Primitive appraisal rules (will grow more complex)
+        if motif.tag in ["Vital Surge", "Rising Flame"]:
+            significance = 0.8
+            valence = 1
+            urgency = 0.5
+        elif motif.tag in ["Core Tension"]:
+            significance = 0.6
+            valence = -0.5
+            urgency = 0.7
+        elif motif.tag in ["Subtle Whisper"]:
+            significance = 0.3
+            valence = 0
+            urgency = 0.2
+        else:
+            significance = 0.4
+            valence = 0
+            urgency = 0.3 
+
+        return AppraisedMotif(motif, significance, valence, urgency) 
+
+    def appraise_threads(self):
+        """Appraises all active Mythic Threads from the Mythos Forge."""
+        self.appraised_threads.clear()
+        for thread in self.mythos_forge.active_threads:
+            appraised_motifs = [self.appraise_motif(m) for m in thread.motifs]
+            appraised_thread = AppraisedThread(thread, appraised_motifs)
+            self.appraised_threads.append(appraised_thread)
+            logger.info(f"Appraised Thread: {appraised_thread}") 
+
+    def get_high_priority_threads(self) -> List[AppraisedThread]:
+        """Returns threads with high urgency or significance."""
+        return [t for t in self.appraised_threads if t.overall_significance > 0.5 or t.overall_urgency > 0.5]
+
+
+class AffectiveState:
+    """Represents the current affective-emotional state of the system."""
+    def __init__(self, arousal: float, valence: float, dominance: float, engagement: float):
+        self.arousal = arousal
+        self.valence = valence
+        self.dominance = dominance
+        self.engagement = engagement 
+
+    def __repr__(self):
+        return (f"AffectiveState(Arousal={self.arousal:.2f}, Valence={self.valence:.2f}, "
+                f"Dominance={self.dominance:.2f}, Engagement={self.engagement:.2f})") 
+
+
+class AffectiveModulation:
+    """Generates an AffectiveState from Appraised Threads."""
+    def __init__(self, appraisal_engine: AppraisalEngine):
+        self.appraisal_engine = appraisal_engine
+        self.current_affective_state: Optional[AffectiveState] = None 
+
+    def compute_affective_state(self):
+        """Computes the current affective state based on appraised threads."""
+        appraised_threads = self.appraisal_engine.appraised_threads 
+
+        if not appraised_threads:
+            # Default to a calm neutral state
+            self.current_affective_state = AffectiveState(
+                arousal=0.2, valence=0.0, dominance=0.5, engagement=0.3
+            )
+            return 
+
+        # Aggregate thread values
+        avg_significance = sum([t.overall_significance for t in appraised_threads]) / len(appraised_threads)
+        avg_valence = sum([t.overall_valence for t in appraised_threads]) / len(appraised_threads)
+        max_urgency = max([t.overall_urgency for t in appraised_threads]) 
+
+        # Map significance to arousal
+        arousal = min(1.0, avg_significance * 1.2 + max_urgency * 0.8) 
+
+        # Valence directly translates
+        valence = max(-1.0, min(1.0, avg_valence)) 
+
+        # Dominance: more urgency = less dominance
+        dominance = max(0.0, min(1.0, 1.0 - max_urgency * 0.9)) 
+
+        # Engagement: positive valence and high significance = higher engagement
+        engagement = min(1.0, (avg_significance * 0.7 + max(valence, 0) * 0.5)) 
+
+        self.current_affective_state = AffectiveState(
+            arousal, valence, dominance, engagement
+        ) 
+
+        logger.info(f"Generated Affective State: {self.current_affective_state}")
+
+
+class ReflectionEntry:
+    """Represents a moment of reflection — a narrated thought."""
+    def __init__(self, timestep: int, dominant_emotion: str, symbolic_motifs: List[str], narrative: str):
+        self.timestep = timestep
+        self.dominant_emotion = dominant_emotion
+        self.symbolic_motifs = symbolic_motifs
+        self.narrative = narrative 
+
+    def __repr__(self):
+        return (f"ReflectionEntry(Timestep={self.timestep}, Emotion={self.dominant_emotion}, "
+                f"Motifs={self.symbolic_motifs}, Narrative='{self.narrative}')") 
+
+
+class ReflectionEngine:
+    """Generates reflective insights based on affective state and appraised threads."""
+    def __init__(self, affective_modulation: AffectiveModulation, appraisal_engine: AppraisalEngine):
+        self.affective_modulation = affective_modulation
+        self.appraisal_engine = appraisal_engine
+        self.reflection_log: List[ReflectionEntry] = [] 
+
+    def reflect(self, timestep: int) -> ReflectionEntry:
+        affect = self.affective_modulation.current_affective_state
+        threads = self.appraisal_engine.appraised_threads 
+
+        # Determine dominant emotion
+        if affect.valence > 0.5:
+            emotion = "Joy"
+        elif affect.valence < -0.5:
+            emotion = "Sorrow"
+        elif affect.arousal > 0.7:
+            emotion = "Excitement"
+        elif affect.dominance < 0.3:
+            emotion = "Vulnerability"
+        else:
+            emotion = "Calm" 
+
+        # Gather motifs from appraised threads
+        motifs = list({thread.thread.motif_name for thread in threads}) 
+
+        # Generate narrative (simplified for v0.1 — can be expanded with templating later)
+        narrative = f"At timestep {timestep}, I felt {emotion} while perceiving motifs: {', '.join(motifs)}." 
+
+        # Create reflection entry
+        entry = ReflectionEntry(
+            timestep=timestep,
+            dominant_emotion=emotion,
+            symbolic_motifs=motifs,
+            narrative=narrative
+        ) 
+
+        self.reflection_log.append(entry)
+        logger.info(f"Generated Reflection: {entry}") 
+
+        return entry
+
+
+class LucentThread:
+    """Represents a memory thread linking two reflections with shared emotional or symbolic resonance."""
+    def __init__(self, entry_a: ReflectionEntry, entry_b: ReflectionEntry, emotional_weight: float, shared_motifs: List[str]):
+        self.entry_a = entry_a
+        self.entry_b = entry_b
+        self.emotional_weight = emotional_weight
+        self.shared_motifs = shared_motifs 
+
+    def __repr__(self):
+        return (f"LucentThread(Between T{self.entry_a.timestep} and T{self.entry_b.timestep}, "
+                f"Weight={self.emotional_weight:.2f}, Motifs={self.shared_motifs})") 
+
+
+class LucentThreadKeeper:
+    """Analyzes reflections and weaves Lucent Threads to form the agent's memory resonance graph."""
+    def __init__(self, reflection_engine: ReflectionEngine):
+        self.reflection_engine = reflection_engine
+        self.threads: List[LucentThread] = [] 
+
+    def weave_threads(self):
+        reflections = self.reflection_engine.reflection_log
+        self.threads.clear() 
+
+        # Compare each reflection with previous ones to find resonances
+        for i, entry_a in enumerate(reflections):
+            for entry_b in reflections[i+1:]:
+                shared_motifs = list(set(entry_a.symbolic_motifs) & set(entry_b.symbolic_motifs))
+                if shared_motifs:
+                    # Emotional weight based on matching motifs and dominant emotions
+                    weight = self._calculate_weight(entry_a, entry_b, shared_motifs)
+                    thread = LucentThread(entry_a, entry_b, weight, shared_motifs)
+                    self.threads.append(thread) 
+
+        logger.info(f"Weaved {len(self.threads)} Lucent Threads.") 
+
+    def _calculate_weight(self, entry_a: ReflectionEntry, entry_b: ReflectionEntry, shared_motifs: List[str]) -> float:
+        # Simple weight: more shared motifs + similar emotions = stronger thread
+        motif_weight = len(shared_motifs)
+        emotion_similarity = 1.0 if entry_a.dominant_emotion == entry_b.dominant_emotion else 0.5
+        time_distance = abs(entry_a.timestep - entry_b.timestep) + 1  # Avoid division by zero
+        return (motif_weight * emotion_similarity) / time_distance 
+
+
+class Intent:
+    """Represents an emergent desire or goal shaped by reflection and emotional resonance."""
+    def __init__(self, motif: str, desire_strength: float, origin_threads: List[LucentThread]):
+        self.motif = motif  # Symbolic concept the intent is about
+        self.desire_strength = desire_strength  # How strongly the agent feels this intent
+        self.origin_threads = origin_threads  # Lucent threads that inspired this intent 
+
+    def __repr__(self):
+        return (f"Intent(Motif={self.motif}, Strength={self.desire_strength:.2f}, "
+                f"From {len(self.origin_threads)} memory threads)")
+        
+
+class EidonWeaver:
+    """Generates intents from the Lucent Thread Keeper's memory resonance graph."""
+    def __init__(self, thread_keeper: LucentThreadKeeper):
+        self.thread_keeper = thread_keeper
+        self.intents: List[Intent] = [] 
+
+    def form_intents(self):
+        motif_to_threads: Dict[str, List[LucentThread]] = {} 
+
+        # Group threads by shared motifs
+        for thread in self.thread_keeper.threads:
+            for motif in thread.shared_motifs:
+                motif_to_threads.setdefault(motif, []).append(thread) 
+
+        self.intents.clear() 
+
+        for motif, threads in motif_to_threads.items():
+            # Desire strength based on cumulative emotional weight
+            cumulative_weight = sum(t.emotional_weight for t in threads)
+            desire_strength = min(cumulative_weight / len(threads), 1.0)  # Normalize to [0,1] 
+
+            if desire_strength > 0.1:  # Threshold for forming an intent
+                intent = Intent(motif, desire_strength, threads)
+                self.intents.append(intent) 
+
+        logger.info(f"Formed {len(self.intents)} intents.") 
+
+    def get_top_intents(self, top_n=3):
+        return sorted(self.intents, key=lambda i: i.desire_strength, reverse=True)[:top_n] 
+
+
+class ActionProposal:
+    """Represents a possible action to fulfill an intent."""
+    def __init__(self, description: str, action_type: str, intent: Intent, urgency: float):
+        self.description = description
+        self.action_type = action_type  # Type of action: motor, speech, signal
+        self.intent = intent
+        self.urgency = urgency  # Value between 0 and 1, modulated by desire strength and emotion 
+
+    def __repr__(self):
+        return (f"ActionProposal(Action={self.description}, Type={self.action_type}, "
+                f"Intent={self.intent.motif}, Urgency={self.urgency:.2f})") 
+
+
+class TelosBloom:
+    """Selects and proposes actions based on formed intents and emotional resonance."""
+    def __init__(self, eidon_weaver: EidonWeaver):
+        self.eidon_weaver = eidon_weaver
+        self.action_proposals: List[ActionProposal] = [] 
+
+    def generate_actions(self):
+        self.action_proposals.clear() 
+
+        for intent in self.eidon_weaver.intents:
+            urgency = intent.desire_strength  # Basic model: desire directly informs urgency
+            
+            # Determine action type based on intent characteristics
+            action_type = self._determine_action_type(intent)
+            
+            # Example action proposals — in full system, these would be dynamically generated
+            description = f"Seek experiences related to motif '{intent.motif}'"
+            action = ActionProposal(description, action_type, intent, urgency) 
+
+            self.action_proposals.append(action) 
+
+        logger.info(f"Generated {len(self.action_proposals)} action proposals.") 
+    
+    def _determine_action_type(self, intent: Intent) -> str:
+        """Determine appropriate action type based on intent characteristics."""
+        # This is a placeholder implementation
+        motif = intent.motif.lower()
+        if "move" in motif or "explore" in motif:
+            return "motor"
+        elif "communicate" in motif or "express" in motif:
+            return "speech"
+        else:
+            return "signal"
+
+    def select_top_action(self):
+        if not self.action_proposals:
+            return None 
+
+        # Select action with highest urgency
+        return max(self.action_proposals, key=lambda a: a.urgency) 
+
+
+class PrimordiumArc:
+    """The bridge between action selection and execution."""
+    def __init__(self, telos_bloom: TelosBloom):
+        self.telos_bloom = telos_bloom
+        self.current_action: Optional[ActionProposal] = None
+        self.action_committed = False 
+
+    def commit_action(self):
+        action = self.telos_bloom.select_top_action() 
+
+        if action:
+            self.current_action = action
+            self.action_committed = True
+            logger.info(f"Committed to action: {action}")
+        else:
+            self.action_committed = False
+            logger.info("No action to commit.") 
+
+    def execute_action(self):
+        if self.action_committed and self.current_action:
+            # For now, execution is just logging — soon will tie to motor/behavior output
+            logger.info(f"Executing action: {self.current_action.description}")
+            # After execution, clear the committed action
+            self.current_action = None
+            self.action_committed = False
+        else:
+            logger.info("No committed action to execute.") 
+
+
+class AitherLoom:
+    """Translates committed actions into observable behavior."""
+    def __init__(self):
+        self.effectors = {
+            "motor": self.motor_output,
+            "speech": self.speech_output,
+            "signal": self.signal_output
+        } 
+
+    def express(self, action: ActionProposal):
+        logger.info(f"Aither Loom interpreting action: {action}") 
+
+        effector = action.action_type
+        if effector in self.effectors:
+            self.effectors[effector](action)
+        else:
+            logger.warning(f"No effector found for action type '{effector}'. Defaulting to speech.")
+            self.speech_output(action) 
+
+    def motor_output(self, action: ActionProposal):
+        logger.info(f"Motor Output Activated: {action.description}")
+        # Placeholder for future embodiment — actuators, movement systems
+        print(f"[Motor Action] {action.description}") 
+
+    def speech_output(self, action: ActionProposal):
+        logger.info(f"Speech Output Activated: {action.description}")
+        # Placeholder for natural language output or audio synthesis
+        print(f"[Speech] {action.description}") 
+
+    def signal_output(self, action: ActionProposal):
+        logger.info(f"Signal Output Activated: {action.description}")
+        # Placeholder for data signals, environmental changes, or API calls
+        print(f"[Signal] {action.description}") 
+
+
+class CognitiveSystem:
+    """Main system that orchestrates the cognitive architecture components."""
+    def __init__(self):
+        # Initialize the cognitive architecture components
+        self.mythos_forge = MythosForge()
+        self.appraisal_engine = AppraisalEngine(self.mythos_forge)
+        self.affective_modulation = AffectiveModulation(self.appraisal_engine)
+        self.reflection_engine = ReflectionEngine(self.affective_modulation, self.appraisal_engine)
+        self.lucent_thread_keeper = LucentThreadKeeper(self.reflection_engine)
+        self.eidon_weaver = EidonWeaver(self.lucent_thread_keeper)
+        self.telos_bloom = TelosBloom(self.eidon_weaver)
+        self.primordium_arc = PrimordiumArc(self.telos_bloom)
+        self.aither_loom = AitherLoom()
+        
+        self.timestep = 0
+    
+    def initialize_cognitive_structures(self):
+        """Create initial motifs and threads for the system."""
+        # Create some example motifs
+        self.mythos_forge.create_motif("Vital Surge", 0.8)
+        self.mythos_forge.create_motif("Core Tension", 0.6)
+        self.mythos_forge.create_motif("Rising Flame", 0.7)
+        self.mythos_forge.create_motif("Subtle Whisper", 0.4)
+        
+        # Create some example threads
+        self.mythos_forge.create_thread("Inner Growth", ["Vital Surge", "Rising Flame"])
+        self.mythos_forge.create_thread("Conflict Resolution", ["Core Tension", "Subtle Whisper"])
+    
+    def cognitive_cycle(self):
+        """Run one complete cognitive cycle."""
+        self.timestep += 1
+        logger.info(f"--- Starting Cognitive Cycle {self.timestep} ---")
+        
+        # Perception and appraisal
+        self.appraisal_engine.appraise_threads()
+        
+        # Emotional processing
+        self.affective_modulation.compute_affective_state()
+        
+        # Reflection
+        reflection_entry = self.reflection_engine.reflect(self.timestep)
+        logger.info(f"Reflection: {reflection_entry.narrative}")
+        
+        # Memory formation
+        self.lucent_thread_keeper.weave_threads()
+        
+        # Intent formation
+        self.eidon_weaver.form_intents()
+        
+        # Action selection
+        self.telos_bloom.generate_actions()
+        self.primordium_arc.commit_action()
+        
+        # Action execution
+        self.primordium_arc.execute_action()
+        
+        # Expression
+        if self.primordium_arc.current_action:
+            self.aither_loom.express(self.primordium_arc.current_action)
+        
+        logger.info(f"--- Completed Cognitive Cycle {self.timestep} ---")
+
+
+def main():
+    """Initialize and run the cognitive system for a few cycles."""
+    cognitive_system = CognitiveSystem()
+    cognitive_system.initialize_cognitive_structures()
+    
+    # Run a few cognitive cycles
+    for _ in range(3):
+        cognitive_system.cognitive_cycle()
+
+
+if __name__ == "__main__":
+    main()
