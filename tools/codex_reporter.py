@@ -1,48 +1,50 @@
-from core.mythic_codex import MythicCodex
-import logging
-
-logger = logging.getLogger(__name__)
+import json
+import os
+from datetime import datetime
 
 class CodexReporter:
     """
-    Utility for summarizing and reporting the contents of the Mythic Codex.
+    Exports Mythic Codex crystallization data to external JSON and text files.
     """
 
-    def __init__(self, mythic_codex: MythicCodex):
-        self.mythic_codex = mythic_codex
+    def __init__(self, export_dir: str = "codex_exports"):
+        self.export_dir = export_dir
+        os.makedirs(self.export_dir, exist_ok=True)
 
-    def generate_report(self) -> str:
+    def export(self, crystallized_data, timestep: int):
         """
-        Creates a human-readable report of the Mythic Codex contents.
+        Save the crystallized codex data as JSON and human-readable TXT.
         """
-        if not self.mythic_codex.codex:
-            logger.info("The Mythic Codex is currently empty.")
-            return "Mythic Codex is empty."
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        json_path = os.path.join(self.export_dir, f"codex_t{timestep}_{timestamp}.json")
+        txt_path = os.path.join(self.export_dir, f"codex_t{timestep}_{timestamp}.txt")
 
-        report_lines = ["=== Mythic Codex Report ===\n"]
+        # Save JSON
+        with open(json_path, "w") as json_file:
+            json.dump(crystallized_data, json_file, indent=4)
 
-        for idx, appraised_thread in enumerate(self.mythic_codex.codex, start=1):
-            valence_desc = (
-                "Positive" if appraised_thread.overall_valence > 0 else
-                "Neutral" if appraised_thread.overall_valence == 0 else
-                "Negative"
-            )
-            motifs = ', '.join([m.motif.tag for m in appraised_thread.appraised_motifs])
-            report_lines.append(
-                f"Thread {idx}: {appraised_thread.thread.motif_name}\n"
-                f"    Significance: {appraised_thread.overall_significance:.2f}\n"
-                f"    Valence: {valence_desc}\n"
-                f"    Urgency: {appraised_thread.overall_urgency:.2f}\n"
-                f"    Motifs: {motifs}\n"
-            )
+        # Save human-readable text version
+        with open(txt_path, "w") as txt_file:
+            txt_file.write(self._format_text_report(crystallized_data, timestep))
 
-        report = '\n'.join(report_lines)
-        logger.info("Generated Mythic Codex report.")
-        return report
+        print(f"[CodexReporter] Exported crystallized codex to:\n  {json_path}\n  {txt_path}")
 
-    def print_report(self):
+    def _format_text_report(self, crystallized_data, timestep: int) -> str:
         """
-        Prints the Mythic Codex report directly.
+        Create a readable text report from crystallized data.
         """
-        report = self.generate_report()
-        print(report)
+        lines = [f"=== Mythic Codex Report — Timestep {timestep} ===\n"]
+
+        lines.append(f"Total Crystallized Threads: {len(crystallized_data.get('crystallized_threads', []))}\n")
+
+        for thread in crystallized_data.get("crystallized_threads", []):
+            lines.append(f"Thread Name: {thread['name']}")
+            lines.append(f"  Overall Significance: {thread['significance']:.2f}")
+            lines.append(f"  Overall Valence: {thread['valence']:.2f}")
+            lines.append(f"  Overall Urgency: {thread['urgency']:.2f}")
+            lines.append("  Motifs:")
+            for motif in thread.get("motifs", []):
+                lines.append(f"    - {motif}")
+            lines.append("")  # blank line between threads
+
+        return "\n".join(lines)
