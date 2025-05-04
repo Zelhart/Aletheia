@@ -1,0 +1,301 @@
+from typing import Dict, List, Optional
+import logging
+import random
+from dataclasses import dataclass
+
+from core.appraisal import AppraisalEngine
+from core.affect import AffectiveModulation
+from core.action import ActionProposal
+
+logger = logging.getLogger(__name__)
+
+
+class EchoMeridian:
+    """
+    Observes action outcomes and adjusts appraisal and affect parameters.
+    
+    The Echo Meridian module serves as the learning component of the cognitive 
+    architecture, recording historical outcomes and adapting motif strengths
+    based on positive, neutral, or negative feedback.
+    """
+    
+    @dataclass
+    class OutcomeRecord:
+        """Data structure for storing outcome observations."""
+        motif: str
+        urgency: float
+        outcome: str
+        timestamp: float  # System timestamp when outcome was recorded
+    
+    def __init__(self, 
+                 appraisal_engine: AppraisalEngine, 
+                 affective_modulation: AffectiveModulation,
+                 learning_rate: float = 0.05):
+        """
+        Initialize the Echo Meridian module.
+        
+        Args:
+            appraisal_engine: Module handling appraisal processes
+            affective_modulation: Module handling emotional responses
+            learning_rate: Rate at which motif strengths are adjusted (default: 0.05)
+        """
+        self.appraisal_engine = appraisal_engine
+        self.affective_modulation = affective_modulation
+        self.learning_rate = learning_rate
+        self.history: List[EchoMeridian.OutcomeRecord] = []
+        
+        logger.info("Echo Meridian initialized with learning rate: %.2f", self.learning_rate)
+    
+    def observe_outcome(self, action: ActionProposal, outcome: str, timestamp: Optional[float] = None) -> None:
+        """
+        Records and processes the outcome of an executed action.
+        
+        Args:
+            action: The action proposal that was executed
+            outcome: Result classification ('positive', 'neutral', or 'negative')
+            timestamp: Optional timestamp for the observation (defaults to None,
+                      in which case current system time will be used)
+        """
+        if outcome not in ("positive", "neutral", "negative"):
+            raise ValueError(f"Invalid outcome: {outcome}. Must be 'positive', 'neutral', or 'negative'")
+        
+        # Import time here to avoid circular imports
+        import time
+        current_time = timestamp if timestamp is not None else time.time()
+        
+        # Record the observation
+        record = self.OutcomeRecord(
+            motif=action.intent.motif,
+            urgency=action.urgency,
+            outcome=outcome,
+            timestamp=current_time
+        )
+        self.history.append(record)
+        
+        logger.info(f"Echo Meridian observing outcome: {outcome} for action: {action.description}")
+        
+        # Adjust appraisals and affect based on outcome
+        self._adjust_motif_weights(action.intent.motif, outcome)
+        
+        # Additionally update affective state if needed
+        self._update_affective_response(action, outcome)
+    
+    def _adjust_motif_weights(self, motif_tag: str, outcome: str) -> None:
+        """
+        Adjusts motif strengths based on action outcomes.
+        
+        Args:
+            motif_tag: The identifier for the motif to adjust
+            outcome: The outcome classification
+        """
+        motif = self.appraisal_engine.mythos_forge.motifs.get(motif_tag)
+        if not motif:
+            logger.warning(f"No motif found for tag '{motif_tag}' — cannot adjust.")
+            return
+        
+        old_strength = motif.strength
+        
+        # Apply reinforcement logic based on outcome
+        if outcome == "positive":
+            motif.strength = min(1.0, motif.strength + self.learning_rate)
+            logger.info(f"Motif '{motif_tag}' strength increased: {old_strength:.2f} → {motif.strength:.2f}")
+            
+        elif outcome == "negative":
+            motif.strength = max(0.0, motif.strength - self.learning_rate)
+            logger.info(f"Motif '{motif_tag}' strength decreased: {old_strength:.2f} → {motif.strength:.2f}")
+            
+        else:  # neutral
+            logger.info(f"No change to motif '{motif_tag}' for neutral outcome")
+    
+    def _update_affective_response(self, action: ActionProposal, outcome: str) -> None:
+        """
+        Updates the affective state based on action outcomes.
+        
+        Args:
+            action: The action that was executed
+            outcome: The result classification
+        """
+        # This is a placeholder for more sophisticated affective updating
+        if outcome == "positive":
+            # Potentially increase positive affect associated with this motif
+            self.affective_modulation.boost_positive_affect(magnitude=0.1)
+        elif outcome == "negative":
+            # Potentially increase negative affect associated with this motif
+            self.affective_modulation.boost_negative_affect(magnitude=0.1)
+    
+    def get_motif_success_rate(self, motif_tag: str) -> Dict:
+        """
+        Calculates the success rate for a specific motif.
+        
+        Args:
+            motif_tag: The identifier for the motif to analyze
+            
+        Returns:
+            Dict containing success metrics for the specified motif
+        """
+        motif_records = [r for r in self.history if r.motif == motif_tag]
+        
+        if not motif_records:
+            return {"motif": motif_tag, "success_rate": 0, "total_attempts": 0}
+        
+        positive_outcomes = sum(1 for r in motif_records if r.outcome == "positive")
+        total_attempts = len(motif_records)
+        
+        return {
+            "motif": motif_tag,
+            "success_rate": positive_outcomes / total_attempts if total_attempts > 0 else 0,
+            "total_attempts": total_attempts,
+            "positive_outcomes": positive_outcomes,
+            "neutral_outcomes": sum(1 for r in motif_records if r.outcome == "neutral"),
+            "negative_outcomes": sum(1 for r in motif_records if r.outcome == "negative")
+        }
+    
+    def review_history(self, limit: int = None) -> List[OutcomeRecord]:
+        """
+        Returns the outcome history, optionally limited to the most recent entries.
+        
+        Args:
+            limit: Optional maximum number of records to return (newest first)
+            
+        Returns:
+            List of outcome records
+        """
+        records = self.history
+        if limit:
+            records = records[-limit:]
+            
+        logger.info(f"Echo Meridian — Reviewing {len(records)} outcome records")
+        return records
+
+
+class CognitiveCore:
+    """
+    Core cognitive processing system integrating perception, emotion, 
+    memory, intention, action, and learning.
+    """
+    
+    def __init__(self):
+        """Initialize the cognitive architecture components."""
+        # Initialize all cognitive subsystems
+        self.appraisal_engine = AppraisalEngine()
+        self.affective_modulation = AffectiveModulation()
+        self.reflection_engine = ReflectionEngine()
+        self.lucent_thread_keeper = LucentThreadKeeper()
+        self.eidon_weaver = EidonWeaver()
+        self.telos_bloom = TelosBloom()
+        self.primordium_arc = PrimordiumArc()
+        self.aither_loom = AitherLoom()
+        
+        # Initialize learning system
+        self.echo_meridian = EchoMeridian(
+            self.appraisal_engine, 
+            self.affective_modulation,
+            learning_rate=0.05
+        )
+        
+        self.timestep = 0
+        logger.info("Cognitive Core initialized - all systems ready")
+    
+    def cognitive_cycle(self):
+        """
+        Execute one complete cognitive cycle through all subsystems.
+        
+        This implements the full perception-cognition-action-learning loop.
+        """
+        self.timestep += 1
+        logger.info(f"--- Starting Cognitive Cycle {self.timestep} ---")
+        
+        # Phase 1: Perception and Appraisal
+        self.appraisal_engine.appraise_threads()
+        
+        # Phase 2: Emotional Processing
+        self.affective_modulation.compute_affective_state()
+        
+        # Phase 3: Reflection and Meaning-Making
+        reflection_entry = self.reflection_engine.reflect(self.timestep)
+        logger.info(f"Reflection: {reflection_entry.narrative}")
+        
+        # Phase 4: Memory Formation and Integration
+        self.lucent_thread_keeper.weave_threads()
+        
+        # Phase 5: Intent Formation
+        self.eidon_weaver.form_intents()
+        
+        # Phase 6: Action Selection and Planning
+        self.telos_bloom.generate_actions()
+        self.primordium_arc.commit_action()
+        
+        # Phase 7: Action Execution
+        action_result = self.primordium_arc.execute_action()
+        
+        # Phase 8: Expression
+        if self.primordium_arc.current_action:
+            self.aither_loom.express(self.primordium_arc.current_action)
+        
+        # Phase 9: Outcome Observation and Learning
+        if self.primordium_arc.current_action:
+            outcome = self._evaluate_outcome(self.primordium_arc.current_action, action_result)
+            self.echo_meridian.observe_outcome(self.primordium_arc.current_action, outcome)
+        
+        logger.info(f"--- Completed Cognitive Cycle {self.timestep} ---")
+        return {
+            "timestep": self.timestep,
+            "action": self.primordium_arc.current_action,
+            "outcome": outcome if self.primordium_arc.current_action else None
+        }
+    
+    def _evaluate_outcome(self, action: ActionProposal, result: Dict) -> str:
+        """
+        Evaluates action results to determine outcome classification.
+        
+        This method replaces the random simulation with actual outcome evaluation
+        based on the results of action execution.
+        
+        Args:
+            action: The action that was executed
+            result: The result data from action execution
+            
+        Returns:
+            Outcome classification: 'positive', 'neutral', or 'negative'
+        """
+        # This is where more sophisticated outcome evaluation logic would go
+        # Currently the system would analyze result metrics to determine outcome
+        
+        if not result:
+            logger.warning("No result data available for outcome evaluation")
+            return "neutral"
+            
+        # For now, we'll use a simplified evaluation based on success flag
+        if result.get("success", False):
+            return "positive"
+        elif result.get("partial_success", False):
+            return "neutral"
+        else:
+            return "negative"
+    
+    def _simulate_outcome(self, action: ActionProposal) -> str:
+        """
+        Simplified outcome simulation for testing and development.
+        
+        Note: This is a temporary method for simulation and testing purposes.
+        In production, use _evaluate_outcome with actual action results.
+        
+        Args:
+            action: The action to simulate an outcome for
+            
+        Returns:
+            Simulated outcome: 'positive', 'neutral', or 'negative'
+        """
+        # Factor in action urgency to influence outcome probability
+        urgency_factor = min(action.urgency * 0.2, 0.2)  # Cap the influence
+        
+        # Weighted random outcome
+        roll = random.random()
+        
+        # Higher urgency slightly increases chance of positive outcome
+        if roll < (0.4 + urgency_factor):
+            return "positive"
+        elif roll < 0.7:
+            return "neutral"
+        else:
+            return "negative"
