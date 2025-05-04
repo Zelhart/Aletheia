@@ -12,6 +12,7 @@ from core.primordium import PrimordiumArc
 from core.aither import AitherLoom
 from memory.echo_meridian import EchoMeridian
 from memory.mythic_codex import MythicCodex
+from tools.codex_reporter import CodexReporter
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,6 @@ class CognitiveCore:
     
     def __init__(self, crystallization_interval: int = 5):
         """Initialize the cognitive architecture components."""
-        # Initialize all cognitive subsystems
         self.appraisal_engine = AppraisalEngine()
         self.affective_modulation = AffectiveModulation()
         self.reflection_engine = ReflectionEngine()
@@ -38,8 +38,8 @@ class CognitiveCore:
             learning_rate=0.05
         )
 
-        # Mythic Codex for crystallizing appraised threads
         self.mythic_codex = MythicCodex(self.appraisal_engine)
+        self.codex_reporter = CodexReporter()  # NEW
 
         self.timestep = 0
         self.crystallization_interval = crystallization_interval
@@ -47,60 +47,42 @@ class CognitiveCore:
         logger.info("Cognitive Core initialized - all systems ready")
     
     def cognitive_cycle(self):
-        """
-        Execute one complete cognitive cycle through all subsystems.
-        """
         self.timestep += 1
         logger.info(f"--- Starting Cognitive Cycle {self.timestep} ---")
-        
-        # Phase 1: Perception and Appraisal
+
         self.appraisal_engine.appraise_threads()
-        
-        # Phase 2: Emotional Processing
         self.affective_modulation.compute_affective_state()
-        
-        # Phase 3: Reflection and Meaning-Making
         reflection_entry = self.reflection_engine.reflect(self.timestep)
         logger.info(f"Reflection: {reflection_entry.narrative}")
-        
-        # Phase 4: Memory Formation and Integration
         self.lucent_thread_keeper.weave_threads()
-        
-        # Phase 5: Intent Formation
         self.eidon_weaver.form_intents()
-        
-        # Phase 6: Action Selection and Planning
         self.telos_bloom.generate_actions()
         self.primordium_arc.commit_action()
-        
-        # Phase 7: Action Execution
         action_result = self.primordium_arc.execute_action()
-        
-        # Phase 8: Expression
+
         if self.primordium_arc.current_action:
             self.aither_loom.express(self.primordium_arc.current_action)
-        
-        # Phase 9: Outcome Observation and Learning
+
         if self.primordium_arc.current_action:
             outcome = self._evaluate_outcome(self.primordium_arc.current_action, action_result)
             self.echo_meridian.observe_outcome(self.primordium_arc.current_action, outcome)
+        else:
+            outcome = None
 
-        # Phase 10: Periodic Crystallization into the Mythic Codex
+        # Mythic Codex crystallization + export
         if self.timestep % self.crystallization_interval == 0:
-            self.mythic_codex.crystallize()
-            logger.info("Mythic Codex crystallization completed.")
+            crystallized = self.mythic_codex.crystallize()
+            self.codex_reporter.export(crystallized, self.timestep)
+            logger.info("Mythic Codex crystallization and export completed.")
 
         logger.info(f"--- Completed Cognitive Cycle {self.timestep} ---")
         return {
             "timestep": self.timestep,
             "action": self.primordium_arc.current_action,
-            "outcome": outcome if self.primordium_arc.current_action else None
+            "outcome": outcome
         }
 
     def _evaluate_outcome(self, action, result: Dict) -> str:
-        """
-        Evaluates action results to determine outcome classification.
-        """
         if not result:
             logger.warning("No result data available for outcome evaluation")
             return "neutral"
