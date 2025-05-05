@@ -1,0 +1,76 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Run whitespace sanitizer
+      run: |
+        # Make the script executable
+        chmod +x ./Sanitize_whitespace.py
+        
+        # Run sanitizer in non-dry-run mode to fix issues
+        python ./Sanitize_whitespace.py --verbose
+      
+    - name: Check for modifications
+      id: check-modifications
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "Whitespace issues were fixed. Committing changes."
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "Fix whitespace issues with Sanitize_whitespace.py"
+          git push
+          echo "modifications=true" >> $GITHUB_OUTPUT
+        else
+          echo "No whitespace issues found."
+          echo "modifications=false" >> $GITHUB_OUTPUT
+        fi
+      
+    # Skip remaining workflow steps if whitespace issues were fixed
+    # This will allow the regular build to run on the fixed commit
+    - name: Exit workflow if modifications were made
+      if: steps.check-modifications.outputs.modifications == 'true'
+      run: exit 0
+
+  build:
+    needs: sanitize
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Test with pytest
+      run: |
+        pytest
