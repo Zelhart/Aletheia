@@ -1,147 +1,142 @@
-import logging
-import time
-from typing import Optional
+# cognitive_core.py
 
-from core.perception import SymbolicPerceptionEngine
+import logging
+import random
+
 from core.appraisal import AppraisalEngine
 from core.affect import AffectiveModulation
 from core.reflection import ReflectionEngine
 from core.memory import LucentThreadKeeper
 from core.intent import EidonWeaver
-from core.action import TelosBloom, ActionProposal
-from core.primordium import PrimordiumArc
+from core.action import TelosBloom, PrimordiumArc, ActionProposal
 from core.expression import AitherLoom
 from core.learning import EchoMeridian
+from core.codex import Codex
+from narrative.mythopoetic_narrative import MythopoeticNarrator
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class CognitiveCore:
     """
-    Core cognitive processing system integrating perception, emotion, 
-    memory, intention, action, and learning.
+    Core cognitive processing system integrating perception, emotion,
+    memory, intention, action, narrative, and learning.
     """
 
     def __init__(self):
         """Initialize the full cognitive architecture."""
 
-        # --- Perception ---
-        self.perception_engine = SymbolicPerceptionEngine()
-
-        # --- Appraisal and Affect ---
-        self.appraisal_engine = AppraisalEngine(self.perception_engine)
+        # === Core Modules ===
+        self.appraisal_engine = AppraisalEngine()
         self.affective_modulation = AffectiveModulation(self.appraisal_engine)
-
-        # --- Reflection & Memory ---
         self.reflection_engine = ReflectionEngine(self.affective_modulation, self.appraisal_engine)
         self.lucent_thread_keeper = LucentThreadKeeper(self.reflection_engine)
-
-        # --- Intention & Action ---
         self.eidon_weaver = EidonWeaver(self.lucent_thread_keeper)
         self.telos_bloom = TelosBloom(self.eidon_weaver)
         self.primordium_arc = PrimordiumArc(self.telos_bloom)
         self.aither_loom = AitherLoom()
 
-        # --- Learning ---
+        # === Learning and Memory ===
         self.echo_meridian = EchoMeridian(self.appraisal_engine, self.affective_modulation)
+        self.codex = Codex()
 
-        # --- Internal State ---
+        # === Narrative Layer ===
+        self.narrator = MythopoeticNarrator()
+
+        # Internal state
         self.timestep = 0
 
-        logger.info("Cognitive Core initialized - all systems online.")
+        logger.info("Cognitive Core fully initialized — all systems operational.")
 
-    def perceive(self, observations: list):
-        """
-        Feed new perceptions into the system.
+    def initialize_cognitive_structures(self):
+        """Create initial motifs and threads for the system."""
+        self.appraisal_engine.mythos_forge.create_motif("Vital Surge", 0.8)
+        self.appraisal_engine.mythos_forge.create_motif("Core Tension", 0.6)
+        self.appraisal_engine.mythos_forge.create_motif("Rising Flame", 0.7)
+        self.appraisal_engine.mythos_forge.create_motif("Subtle Whisper", 0.4)
 
-        Args:
-            observations: List of symbolic tags observed.
-        """
-        self.perception_engine.observe(observations)
+        self.appraisal_engine.mythos_forge.create_thread(
+            "Inner Growth", ["Vital Surge", "Rising Flame"]
+        )
+        self.appraisal_engine.mythos_forge.create_thread(
+            "Conflict Resolution", ["Core Tension", "Subtle Whisper"]
+        )
+
+        logger.info("Cognitive structures initialized with motifs and threads.")
 
     def cognitive_cycle(self):
         """
-        Execute one complete cognitive cycle.
+        Execute one complete cognitive cycle through all subsystems.
+        This implements the full perception-cognition-action-learning loop.
         """
-
         self.timestep += 1
-        logger.info(f"=== Cognitive Cycle {self.timestep} ===")
+        logger.info(f"=== Starting Cognitive Cycle {self.timestep} ===")
 
-        # --- Phase 1: Perception already occurred via perceive() ---
-
-        # --- Phase 2: Appraisal ---
+        # --- 1. Appraisal ---
         self.appraisal_engine.appraise_threads()
 
-        # --- Phase 3: Affective Processing ---
+        # --- 2. Emotional Processing ---
         self.affective_modulation.compute_affective_state()
 
-        # --- Phase 4: Reflection ---
+        # --- 3. Reflection ---
         reflection_entry = self.reflection_engine.reflect(self.timestep)
         logger.info(f"Reflection: {reflection_entry.narrative}")
 
-        # --- Phase 5: Memory Weaving ---
+        # --- 4. Memory Formation ---
         self.lucent_thread_keeper.weave_threads()
 
-        # --- Phase 6: Intent Formation ---
+        # --- 5. Intent Formation ---
         self.eidon_weaver.form_intents()
 
-        # --- Phase 7: Action Planning ---
+        # --- 6. Action Selection ---
         self.telos_bloom.generate_actions()
         self.primordium_arc.commit_action()
 
-        # --- Phase 8: Action Execution ---
+        # --- 7. Action Execution ---
         action_result = self.primordium_arc.execute_action()
 
-        # --- Phase 9: Expression ---
+        # --- 8. Expression ---
         if self.primordium_arc.current_action:
             self.aither_loom.express(self.primordium_arc.current_action)
 
-        # --- Phase 10: Outcome Evaluation and Learning ---
+        # --- 9. Codex Crystalization ---
+        crystal = self.codex.crystallize(
+            timestep=self.timestep,
+            reflection=reflection_entry,
+            affective_state=self.affective_modulation.current_affective_state,
+            top_intents=self.eidon_weaver.get_top_intents()
+        )
+
+        # --- 10. Mythopoetic Narrative ---
+        narrative = self.narrator.compose_narrative(crystal)
+        logger.info(f"Narrative Summary: {narrative.title} | Mood: {narrative.mood}")
+
+        # --- 11. Outcome and Learning ---
         if self.primordium_arc.current_action:
-            outcome = self._evaluate_outcome(self.primordium_arc.current_action, action_result)
-            self.echo_meridian.observe_outcome(self.primordium_arc.current_action, outcome)
+            outcome = self._simulate_outcome(self.primordium_arc.current_action)
+            self.echo_meridian.observe_outcome(
+                self.primordium_arc.current_action, outcome
+            )
         else:
             outcome = None
 
-        logger.info(f"=== End of Cycle {self.timestep} ===")
+        logger.info(f"=== Completed Cognitive Cycle {self.timestep} ===")
 
         return {
             "timestep": self.timestep,
             "action": self.primordium_arc.current_action,
-            "outcome": outcome
+            "outcome": outcome,
+            "narrative": narrative
         }
 
-    def _evaluate_outcome(self, action: ActionProposal, result: Optional[dict]) -> str:
+    def _simulate_outcome(self, action: ActionProposal) -> str:
         """
-        Evaluates the result of an executed action.
-
-        Args:
-            action: Action executed.
-            result: Result details from execution.
-
-        Returns:
-            Outcome string: 'positive', 'neutral', or 'negative'.
+        Temporary method to simulate action outcomes for testing purposes.
+        Higher urgency increases the chance of a positive result.
         """
-        if not result:
-            logger.warning("No result data available for outcome evaluation.")
-            return "neutral"
-
-        if result.get("success", False):
-            return "positive"
-        elif result.get("partial_success", False):
-            return "neutral"
-        else:
-            return "negative"
-
-    def simulate_outcome(self, action: ActionProposal) -> str:
-        """
-        Placeholder for testing outcomes without environment integration.
-        """
-        import random
         urgency_factor = min(action.urgency * 0.2, 0.2)
         roll = random.random()
+
         if roll < (0.4 + urgency_factor):
             return "positive"
         elif roll < 0.7:
