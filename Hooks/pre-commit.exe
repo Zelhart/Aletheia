@@ -1,0 +1,15 @@
+#!/bin/sh
+# pre-commit hook to sanitize whitespace issues
+# Place this file in .git/hooks/pre-commit and make it executable
+
+# Sanitize whitespace in Python files
+echo "Running whitespace sanitizer..."
+python Sanitize_whitespace.py --verbose
+
+# Check if any files were modified
+if [ $? -eq 1 ]; then
+    echo "Whitespace issues were found and fixed. Please review the changes and add them to your commit."
+    exit 1
+fi
+
+exit 0
