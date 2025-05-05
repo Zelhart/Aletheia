@@ -1,23 +1,25 @@
-core/
-├── affect.py
-├── appraisal.py
-├── action.py
-├── cognitive_core.py ✅
-├── consolidation.py
-├── intent.py
-├── learning.py
-├── log_manager.py ✅
-├── memory.py
-├── narrative.py
-├── perception.py (planned soon)
-├── reflection.py
-├── expression.py
-tests/
-├── __init__.py ✅
-├── conftest.py ✅
-├── test_cognitive_cycle.py ✅
-├── test_codex_logging.py ✅
-├── test_motif_learning.py ✅
-logs/
-├── codex_crystals.jsonl (runtime created)
-├── narratives.jsonl (runtime created)
+Aletheia/
+├── Core/
+│   ├── codex.py
+│   ├── cognative_core.py
+│   ├── log_manager.py
+│   ├── mythic_codex.py
+│   ├── perception.py
+├── narrative/
+│   ├── mythopoetic_narrative.py
+├── tools/
+│   ├── codex_reporter.py
+│   ├── [learning_inspector.py]   <== (pending)
+├── test/
+│   ├── __init__.py
+│   ├── confest.py
+│   ├── test_codex_logging.py
+│   ├── test_codex_reporter.py
+│   ├── test_cognitive_cycle.py
+│   ├── test_motif_learning.py
+│   ├── testing_motif_learning.py
+│   ├── [test_learning_inspector.py]   <== (pending)
+├── Will Power   <== placeholder for volition + embodiment (or link to embodiment/)
+├── main.py
+├── Scaffolding/
+│   ├── [all prototype / baseline resources]
