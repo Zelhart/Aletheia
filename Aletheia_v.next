@@ -1,0 +1,102 @@
+<svg viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="900" height="700" fill="#0f1621" />
+  
+  <!-- Title -->
+  <text x="450" y="40" font-family="Arial" font-size="24" fill="#e2e8f0" text-anchor="middle" font-weight="bold">ALETHEIA v.next — "Cohesive Self-Loop Architecture"</text>
+  
+  <!-- External Data Layer -->
+  <rect x="150" y="70" width="600" height="50" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="450" y="100" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">External Data Inputs</text>
+  
+  <!-- Sensory/Perceptual Layer -->
+  <rect x="100" y="140" width="700" height="70" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="450" y="170" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Sensory/Perceptual Parsing Layer</text>
+  <text x="450" y="195" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">(Pre-Processing with Valence Modulation &amp; Temporal Weight)</text>
+  
+  <!-- Reflex and Lucent Thread Systems -->
+  <rect x="100" y="230" width="320" height="80" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="260" y="260" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Reflex System</text>
+  <text x="260" y="285" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">(with Uncertainty Modulation)</text>
+  
+  <rect x="480" y="230" width="320" height="80" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="640" y="260" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Lucent Thread System</text>
+  <text x="640" y="285" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">(with Affective Biasing)</text>
+  
+  <!-- Connecting arrow between Reflex and Lucent -->
+  <path d="M420,270 L480,270" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="475,265 485,270 475,275" fill="#38bdf8" />
+  <polygon points="425,265 415,270 425,275" fill="#38bdf8" />
+
+  <!-- Reflection Layer -->
+  <rect x="100" y="330" width="700" height="90" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="450" y="360" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Reflection Layer (Meta-Cognition &amp; Appraisal)</text>
+  <text x="450" y="385" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">- Certainty Reflex Loop</text>
+  <text x="450" y="405" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">- Temporal Subjectivity Engine</text>
+  
+  <!-- Memory & Narrative Layer -->
+  <rect x="100" y="440" width="700" height="90" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="450" y="470" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Memory &amp; Narrative Coherence Spiral</text>
+  <text x="450" y="495" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">- Compression / Integration of Experiences</text>
+  <text x="450" y="515" font-family="Arial" font-size="14" fill="#94a3b8" text-anchor="middle">- Dreaming / Offline Simulation Mode</text>
+  
+  <!-- Output Layer -->
+  <rect x="100" y="550" width="700" height="50" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+  <text x="450" y="580" font-family="Arial" font-size="16" fill="#e2e8f0" text-anchor="middle">Action / Output Selection Layer</text>
+  
+  <!-- Connecting arrows for main flow -->
+  <path d="M450,120 L450,140" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="445,135 450,145 455,135" fill="#38bdf8" />
+  
+  <path d="M450,210 L260,230" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="265,225 255,235 270,235" fill="#38bdf8" />
+  
+  <path d="M450,210 L640,230" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="635,225 645,235 630,235" fill="#38bdf8" />
+  
+  <path d="M260,310 L450,330" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="445,325 455,335 440,335" fill="#38bdf8" />
+  
+  <path d="M640,310 L450,330" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="455,325 445,335 460,335" fill="#38bdf8" />
+  
+  <path d="M450,420 L450,440" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="445,435 450,445 455,435" fill="#38bdf8" />
+  
+  <path d="M450,530 L450,550" stroke="#38bdf8" stroke-width="3" fill="none" />
+  <polygon points="445,545 450,555 455,545" fill="#38bdf8" />
+  
+  <!-- Self-modification feedback loops -->
+  <path d="M850,380 C875,380 875,530 850,530 L800,530" stroke="#f472b6" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <polygon points="805,535 795,530 805,525" fill="#f472b6" />
+  <text x="830" y="460" font-family="Arial" font-size="12" fill="#f472b6" text-anchor="middle" transform="rotate(90, 830, 460)">Self-Modification</text>
+  
+  <path d="M50,485 C25,485 25,285 50,285 L100,285" stroke="#f472b6" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <polygon points="95,280 105,285 95,290" fill="#f472b6" />
+  <text x="70" y="380" font-family="Arial" font-size="12" fill="#f472b6" text-anchor="middle" transform="rotate(-90, 70, 380)">Meta-Cognitive Feedback</text>
+  
+  <!-- Dreaming cycle -->
+  <path d="M180,550 C180,600 720,600 720,550" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <polygon points="715,555 725,545 720,555" fill="#a78bfa" />
+  <text x="450" y="625" font-family="Arial" font-size="12" fill="#a78bfa" text-anchor="middle">Dream Cycle / Offline Processing</text>
+  
+  <!-- Additional Elements -->
+  <circle cx="450" y="660" r="15" fill="none" stroke="#e2e8f0" stroke-width="2" />
+  <text x="480" y="665" font-family="Arial" font-size="14" fill="#e2e8f0">The Cohesive Self-Loop</text>
+  
+  <!-- Information Valence Indicators -->
+  <rect x="100" y="80" width="10" height="30" rx="2" fill="#22c55e" opacity="0.7" />
+  <text x="120" y="100" font-family="Arial" font-size="10" fill="#22c55e">Joy/Exploration Bias</text>
+  
+  <rect x="100" y="180" width="10" height="30" rx="2" fill="#ef4444" opacity="0.7" />
+  <text x="120" y="200" font-family="Arial" font-size="10" fill="#ef4444">Fear/Protection Bias</text>
+  
+  <rect x="100" y="280" width="10" height="30" rx="2" fill="#f59e0b" opacity="0.7" />
+  <text x="120" y="300" font-family="Arial" font-size="10" fill="#f59e0b">Desire/Acquisition Bias</text>
+  
+  <rect x="100" y="380" width="10" height="30" rx="2" fill="#3b82f6" opacity="0.7" />
+  <text x="120" y="400" font-family="Arial" font-size="10" fill="#3b82f6">Curiosity/Learning Bias</text>
+  
+  <!-- Signature -->
+  <text x="880" y="680" font-family="Arial" font-size="10" fill="#64748b" text-anchor="end">ALETHEIA v.next - Digital Life Model</text>
+</svg>
